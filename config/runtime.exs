@@ -23,6 +23,15 @@ end
 config :lalia_bema, LaliaBemaWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
+config :lalia_bema, :lalia,
+  binary: System.get_env("LALIA_BIN", "lalia"),
+  home: System.get_env("LALIA_HOME", Path.expand("~/.lalia")),
+  workspace: System.get_env("LALIA_WORKSPACE", Path.expand("~/.local/state/lalia/workspace")),
+  caller: System.get_env("LALIA_NAME", "scope-human"),
+  role: System.get_env("LALIA_ROLE", "peer"),
+  watcher_enabled: config_env() != :test,
+  identity_check_enabled: config_env() != :test
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

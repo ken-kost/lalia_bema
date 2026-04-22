@@ -51,7 +51,17 @@ config :spark,
 
 config :lalia_bema,
   ecto_repos: [LaliaBema.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  ash_domains: [LaliaBema.Scope]
+
+config :lalia_bema, :lalia,
+  binary: "lalia",
+  home: Path.expand("~/.lalia"),
+  workspace: Path.expand("~/.local/state/lalia/workspace"),
+  caller: "scope-human",
+  role: "peer",
+  watcher_enabled: true,
+  identity_check_enabled: true
 
 # Configure the endpoint
 config :lalia_bema, LaliaBemaWeb.Endpoint,

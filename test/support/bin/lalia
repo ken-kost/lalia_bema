@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Fake `lalia` binary for LaliaBema tests.
+#
+# Honors these env vars:
+#   LALIA_STUB_OUT      - contents written to stdout
+#   LALIA_STUB_ERR      - contents written to stderr
+#   LALIA_STUB_EXIT     - exit code (default 0)
+#   LALIA_STUB_ARGS_LOG - path to a file that captures each argv invocation,
+#                         one line per call, tab-separated.
+#
+# When unset, it prints the raw argv so tests can assert by inspecting stdout.
+
+set -u
+
+if [[ -n "${LALIA_STUB_ARGS_LOG:-}" ]]; then
+  printf 'argv\t%s\n' "$*" >> "$LALIA_STUB_ARGS_LOG"
+fi
+
+if [[ -n "${LALIA_STUB_OUT:-}" ]]; then
+  printf '%s' "$LALIA_STUB_OUT"
+else
+  printf 'lalia-stub argv: %s\n' "$*"
+fi
+
+if [[ -n "${LALIA_STUB_ERR:-}" ]]; then
+  printf '%s' "$LALIA_STUB_ERR" >&2
+fi
+
+exit "${LALIA_STUB_EXIT:-0}"

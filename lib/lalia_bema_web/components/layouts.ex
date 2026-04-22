@@ -34,41 +34,85 @@ defmodule LaliaBemaWeb.Layouts do
   slot :inner_block, required: true
 
   def app(assigns) do
+    assigns =
+      assigns
+      |> Map.put_new(:scope_identity, LaliaBema.scope_identity())
+      |> Map.put_new(:identity_state, LaliaBema.identity_state())
+
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
+    <header class="navbar px-4 sm:px-6 lg:px-8 border-b border-base-300 gap-4">
+      <div class="flex-1 flex items-center gap-4">
+        <.link navigate={~p"/"} class="flex items-center gap-2 font-semibold">
+          <img src={~p"/images/logo.svg"} width="28" />
+          <span>Lalia Scope</span>
+        </.link>
+        <nav class="flex flex-wrap gap-1">
+          <.link navigate={~p"/"} class="btn btn-ghost btn-sm">Feed</.link>
+          <.link navigate={~p"/tasks"} class="btn btn-ghost btn-sm">Tasks</.link>
+          <.link navigate={~p"/rooms"} class="btn btn-ghost btn-sm">Rooms</.link>
+          <.link navigate={~p"/agents"} class="btn btn-ghost btn-sm">Agents</.link>
+          <.link navigate={~p"/channels"} class="btn btn-ghost btn-sm">Channels</.link>
+          <.link navigate={~p"/inbox"} class="btn btn-ghost btn-sm">Inbox</.link>
+        </nav>
       </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
+      <div class="flex-none flex items-center gap-3">
+        <form phx-submit="nav-search" id="nav-search" class="flex items-center gap-1">
+          <select name="kind" class="select select-sm select-bordered">
+            <option value="room">room</option>
+            <option value="channel">channel</option>
+          </select>
+          <input
+            name="target"
+            type="text"
+            placeholder="name or peer--pair"
+            class="input input-sm input-bordered w-48"
+          />
+          <button type="submit" class="btn btn-sm btn-primary">Search</button>
+        </form>
+        <.scope_identity_widget identity={@scope_identity} state={@identity_state} />
+        <.theme_toggle />
       </div>
     </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
-      </div>
+    <div :if={@identity_state in [:unregistered, :unknown] or match?({:error, _}, @identity_state)} class="bg-warning/20 border-b border-warning/40 px-4 py-2 text-sm text-warning-content">
+      <span class="font-semibold">Scope identity not registered:</span>
+      writes will fail until <code class="font-mono">{@scope_identity || "scope-human"}</code>
+      is registered. Open
+      <.link navigate={~p"/agents"} class="link">Agents</.link>
+      to register, or run <code class="font-mono">lalia register --name {@scope_identity || "scope-human"}</code>.
+    </div>
+
+    <main class="px-4 py-6 sm:px-6 lg:px-8">
+      {render_slot(@inner_block)}
     </main>
 
     <.flash_group flash={@flash} />
+    """
+  end
+
+  attr :identity, :string, default: nil
+  attr :state, :any, default: :unknown
+
+  def scope_identity_widget(assigns) do
+    ~H"""
+    <.link
+      navigate={~p"/agents"}
+      class="flex items-center gap-2 text-xs border border-base-300 rounded px-2 py-1 hover:bg-base-200"
+      id="scope-identity-widget"
+    >
+      <span class={[
+        "size-2 rounded-full",
+        case @state do
+          :registered -> "bg-success"
+          :unregistered -> "bg-warning"
+          {:error, _} -> "bg-error"
+          _ -> "bg-base-300"
+        end
+      ]} />
+      <span class="font-mono">
+        {@identity || "no-identity"}
+      </span>
+    </.link>
     """
   end
 

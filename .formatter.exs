@@ -1,6 +1,7 @@
 [
   import_deps: [
     :ash_ai,
+    :ash_paper_trail,
     :ash_state_machine,
     :ash_admin,
     :ash_postgres,

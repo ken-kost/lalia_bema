@@ -17,7 +17,16 @@ defmodule LaliaBemaWeb.Router do
   scope "/", LaliaBemaWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", FeedLive, :index
+    live "/tasks", TasksLive, :index
+    live "/rooms", RoomsLive, :index
+    live "/rooms/:name", RoomLive, :show
+    live "/agents", AgentsLive, :index
+    live "/agents/:name", AgentLive, :show
+    live "/channels", ChannelsLive, :index
+    live "/nicknames", NicknamesLive, :index
+    live "/inbox", InboxLive, :index
+    live "/history/:kind/:target", HistoryLive, :index
   end
 
   # Other scopes may use custom stacks.
